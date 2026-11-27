@@ -1974,11 +1974,15 @@ fn thread_replies_match_its_output_schema() {
         json!({"face": {"point": [3, 0, 5]}, "designation": " ", "continuous_flanks": true, "old_auto_size": false, "participants": ["A"]}),
         json!({"faces": [{"body": "A", "point": [3, 0, 5]}, {"body": "B", "point": [23, 0, 5]}], "designation": "M6"}),
         json!({"faces": [{"body": "A", "point": [3, 0, 5]}], "single_face_selection": true, "designation": "M6x0.75"}),
+        json!({"faces": [{"body": "A", "x": 3, "y": 0, "z": 5}], "designation": "M6"}),
         json!({"face": [3, 0, 5], "designation": "M6", "modeled": true, "tip": "start", "chamfer_angle": "30 deg", "chamfer_depth": 0.5, "ease_out": "standard", "from": [3, 0, 10]}),
         json!({"face": [3, 0, 5], "designation": "M6", "up_to": {"origin": [0, 0, 6], "normal": [0, 0, 1]}, "from": [3, 0, 0]}),
         json!({"face": [3, 0, 5], "designation": "M6", "extent": "up_to", "up_to": [3, 0, 7], "from": [3, 0, 0]}),
     ];
+    let input = input_schema_for::<ThreadParams>();
+    let input = input.as_value();
     for p in calls {
+        assert!(conforms(input, input, &p), "{p} doesn't match the input schema {input}");
         let mut s = shafts();
         let r = s.execute("solid.thread", &p).unwrap_or_else(|e| panic!("{p}: {e}"));
         assert!(conforms(schema, schema, &r), "{r} doesn't match {schema}");

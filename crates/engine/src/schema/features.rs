@@ -1709,7 +1709,7 @@ impl JsonSchema for ThreadFacePoint {
     }
 }
 
-/// Thread's `faces`: 1 to 1024 entries `{body, point}`, read as the handler reads them, with its
+/// Thread's `faces`: 1 to 1024 entries `{body, point}` or `{body, x, y, z}`, read as the handler reads them, with its
 /// messages. Whether a body exists, and whether the faces share a component, stay the handler's to
 /// check.
 #[derive(Clone, Debug, PartialEq)]
@@ -1739,14 +1739,19 @@ impl JsonSchema for ThreadFaces {
     fn json_schema(generator: &mut SchemaGenerator) -> Schema {
         let point = generator.subschema_for::<Point3>();
         json_schema!({
-            "description": "The cylindrical faces to thread with the same options, 1 to 1024, each {\"body\", \"point\"}: the body's exact world name or an unambiguous definition name, and a point on the face in mm. Every body must belong to the same component. An automatic size fits each face on its own. Not with `face`.",
+            "description": "The cylindrical faces to thread with the same options, 1 to 1024, each {\"body\", \"point\"} or {\"body\", \"x\", \"y\", \"z\"}: the body's exact world name or an unambiguous definition name, and a point on the face in mm. Every body must belong to the same component. An automatic size fits each face on its own. Not with `face`.",
             "type": "array",
             "minItems": 1,
             "maxItems": MAX_THREAD_FACES,
             "items": {
-                "type": "object",
-                "properties": {"body": {"type": "string"}, "point": point},
-                "required": ["body", "point"]
+                "anyOf": [
+                    {"type": "object", "properties": {"body": {"type": "string"}, "point": point}, "required": ["body", "point"]},
+                    {
+                        "type": "object",
+                        "properties": {"body": {"type": "string"}, "x": {"type": "number"}, "y": {"type": "number"}, "z": {"type": "number"}},
+                        "required": ["body", "x", "y", "z"]
+                    }
+                ]
             }
         })
     }
